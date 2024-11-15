@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 #-------------------------------------------------------------------------------
-# qwiic_template_ex1_title.py TODO: replace template and title
+# qwiic_max1704x_ex1_simple.py 
 #
-# TODO: Add description for this example
+# This file demonstrates the simple API of the SparkFun MAX17043 Arduino library.
+
+# This example will print the gauge's voltage and state-of-charge (SOC) readings
 #-------------------------------------------------------------------------------
-# Written by SparkFun Electronics, TODO: month and year
+# Written by SparkFun Electronics, November 2024
 #
 # This python library supports the SparkFun Electroncis Qwiic ecosystem
 #
@@ -33,26 +35,57 @@
 # SOFTWARE.
 #===============================================================================
 
-import qwiic_max1704x # TODO Import correct package
+import qwiic_max1704x
 import sys
+import time
 
 def runExample():
-	# TODO Replace template and title
-	print("\nQwiic Template Example 1 - Title\n")
+	print("\nQwiic MAX1704X Example 1 - Simple\n")
 
 	# Create instance of device
-	myDevice = qwiic_max1704x.QwiicTemplate() # TODO update as needed
+	myLipo = qwiic_max1704x.QwiicMAX1704X() # defaultsd to the MAX17043 device
+
+	# Comment out above line and comment out below line if not using MAX17043. 
+	# You can pass any of the following device types: 
+	#	kDeviceTypeMAX17043,
+	# 	kDeviceTypeMAX17044, 
+	# 	kDeviceTypeMAX17048, 
+	# 	kDeviceTypeMAX17049
+	#
+	# myLipo = qwiic_max1704x.QwiicMAX1704X(qwiic_max1704x.QwiicMAX1704X.kDeviceTypeMAX17048)
 
 	# Check if it's connected
-	if myDevice.is_connected() == False:
+	if myLipo.is_connected() == False:
 		print("The device isn't connected to the system. Please check your connection", \
 			file=sys.stderr)
 		return
 
 	# Initialize the device
-	myDevice.begin()
+	myLipo.begin()
 
-	# TODO Add basic example code
+	myLipo.quick_start()
+
+	# We can set an interrupt to alert when the battery SoC gets too low.
+	# We can alert at anywhere between 1% - 32%:
+	myLipo.set_threshold(20)
+
+	while True:
+		# get_voltage() returns a voltage value (e.g. 3.93)
+		voltage = myLipo.get_voltage()
+		print("Voltage: %.2fV" % voltage)
+
+		# get_soc() returns the estimated state of charge (e.g. 79%)
+		soc = myLipo.get_soc()
+		print("State of Charge: %.2f%%" % soc)
+
+		# get_alert() returns True if the battery SoC is below the threshold
+		if myLipo.get_alert():
+			print("Battery SoC is below threshold!")
+		else:
+			print("Battery SoC is above threshold.")
+
+		# Delay so as to not spam prints
+		time.sleep(0.500)
 
 if __name__ == '__main__':
 	try:
