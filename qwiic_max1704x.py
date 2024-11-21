@@ -570,7 +570,7 @@ class QwiicMAX1704X(object):
         config &= ~self.kConfigAlertMask
         self._i2c.write_word(self.address, self.kRegConfig, config)
 
-    def get_alert(self, clear):
+    def get_alert(self, clear = False):
         """
         get_alert() - Check if the MAX1704X's ALRT alert interrupt has been triggered.
 
@@ -818,7 +818,7 @@ class QwiicMAX1704X(object):
         config |= newCompensation << self.kConfigCompShift
         self._i2c.write_word(self.address, self.kRegConfig, config)
     
-    def set_valrt_max(self, threshold):
+    def set_valrt_max(self, threshold = 0xFF):
         """
         Set the MAX17048/49 VALRT Maximum threshold
 
@@ -845,7 +845,7 @@ class QwiicMAX1704X(object):
         self._i2c.write_word(self.address, self.kRegCValrt, valrt)
     
 
-    def set_valrt_max_volts(self, threshold_volts):
+    def set_valrt_max_volts(self, threshold_volts = 5.1):
         """
         Helper function to set the MAX17048/49 VALRT Maximum threshold in volts
 
@@ -875,7 +875,7 @@ class QwiicMAX1704X(object):
         valrt = self._i2c.read_word(self.address, self.kRegCValrt)
         return valrt & 0x00FF
 
-    def set_valrt_min(self, threshold):
+    def set_valrt_min(self, threshold = 0x00 ):
         """
         Set the MAX17048/49 VALRT Minimum threshold
 
@@ -900,7 +900,7 @@ class QwiicMAX1704X(object):
         valrt |= threshold << 8
         self._i2c.write_word(self.address, self.kRegCValrt, valrt)
     
-    def set_valrt_min_volts(self, threshold_volts):
+    def set_valrt_min_volts(self, threshold_volts = 0.0):
         """
         Helper function to set the MAX17048/49 VALRT Minimum threshold in volts
 
