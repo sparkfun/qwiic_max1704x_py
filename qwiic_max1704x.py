@@ -190,7 +190,7 @@ class QwiicMAX1704X(object):
         if not self._i2c.isDeviceConnected(self.address):
             return False
         
-        version = self._i2c.read_word(self.address, self.kRegVersion)
+        version = self.read16(self.address, self.kRegVersion)
 
         # Extra test - but only for MAX17048/9
         if self._device >= self.kDeviceTypeMAX17048:
@@ -245,7 +245,7 @@ class QwiicMAX1704X(object):
 
         Note: on the MAX17048/49 this will also clear / disable EnSleep bit
         """
-        self._i2c.write_word(self.address, self.kRegMode, self.kModeQuickStart)
+        self.write16(self.address, self.kRegMode, self.kModeQuickStart)
 
     def get_voltage(self):
         """
@@ -255,7 +255,7 @@ class QwiicMAX1704X(object):
         :return: The voltage as a floating point value
         :rtype: float
         """
-        vcell = self._i2c.read_word(self.address, self.kRegVcell)
+        vcell = self.read16(self.address, self.kRegVcell)
         
         if self._device <= self.kDeviceTypeMAX17044:
             # On the MAX17043/44: vCell is a 12-bit register where each bit represents:
@@ -283,7 +283,7 @@ class QwiicMAX1704X(object):
         :rtype: float
         """
 
-        soc = self._i2c.read_word(self.address, self.kRegSoc)
+        soc = self.read16(self.address, self.kRegSoc)
         percent = (soc & 0xFF00) >> 8
         percent += (soc & 0x00FF) / 256.0
         return percent
@@ -296,7 +296,7 @@ class QwiicMAX1704X(object):
         :return: The version number
         :rtype: int
         """
-        return self._i2c.read_word(self.address, self.kRegVersion)
+        return self.read16(self.address, self.kRegVersion)
 
     def get_id(self):
         """
@@ -309,7 +309,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return 0
         
-        vreset_id = self._i2c.read_word(self.address, self.kRegVResetId)
+        vreset_id = self.read16(self.address, self.kRegVResetId)
         return vreset_id & 0xFF
 
     def set_reset_voltage_threshold(self, threshold):
@@ -335,11 +335,11 @@ class QwiicMAX1704X(object):
         if threshold < 0 or threshold > 127:
             return False
         
-        vreset_id = self._i2c.read_word(self.address, self.kRegVResetId)
+        vreset_id = self.read16(self.address, self.kRegVResetId)
         vreset_id &= (~self.kVResetIdVResetMask)
         vreset_id |= threshold << self.kVResetIdVResetShift
         
-        self._i2c.write_word(self.address, self.kRegVResetId, vreset_id)
+        self.write16(self.address, self.kRegVResetId, vreset_id)
 
     def set_reset_voltage_volts(self, threshold_volts):
         """
@@ -368,9 +368,9 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
         
-        vreset_id = self._i2c.read_word(self.address, self.kRegVResetId)
+        vreset_id = self.read16(self.address, self.kRegVResetId)
         vreset_id &= (~self.kVResetIdComparatorDisMask)
-        self._i2c.write_word(self.address, self.kRegVResetId, vreset_id)
+        self.write16(self.address, self.kRegVResetId, vreset_id)
 
     def disable_comparator(self):
         """
@@ -384,9 +384,9 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
         
-        vreset_id = self._i2c.read_word(self.address, self.kRegVResetId)
+        vreset_id = self.read16(self.address, self.kRegVResetId)
         vreset_id |= self.kVResetIdComparatorDisMask
-        self._i2c.write_word(self.address, self.kRegVResetId, vreset_id)
+        self.write16(self.address, self.kRegVResetId, vreset_id)
 
     def get_change_rate(self):
         """
@@ -398,7 +398,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return 0
         
-        crate = self._i2c.read_word(self.address, self.kRegCRate)
+        crate = self.read16(self.address, self.kRegCRate)
         return crate * 0.208
     
     # TODO: If these next two fns aren't used, remove them
@@ -413,7 +413,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return 0
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         return (status & self.kStatusMask) >> self.kStatusShift
     
     def clear_status_reg_bits(self, mask):
@@ -427,9 +427,9 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         status &= ~mask
-        self._i2c.write_word(self.address, self.kRegStatus, status)
+        self.write16(self.address, self.kRegStatus, status)
 
     def is_reset(self, clear = False):
         """
@@ -444,7 +444,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         reset = (status & self.kStatusRiMask) == self.kStatusRiMask
 
         if clear and reset:
@@ -466,7 +466,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         vh = (status & self.kStatusVhMask) == self.kStatusVhMask
 
         if clear and vh:
@@ -488,7 +488,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         vl = (status & self.kStatusVlMask) == self.kStatusVlMask
 
         if clear and vl:
@@ -510,7 +510,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         vr = (status & self.kStatusVrMask) == self.kStatusVrMask
 
         if clear and vr:
@@ -532,7 +532,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         hd = (status & self.kStatusHdMask) == self.kStatusHdMask
 
         if clear and hd:
@@ -553,7 +553,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         sc = (status & self.kStatusScMask) >> self.kStatusScShift
 
         if clear and sc:
@@ -566,9 +566,9 @@ class QwiicMAX1704X(object):
         clearAlert() - Clear the MAX1704X's ALRT alert flag.
         """
 
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         config &= ~self.kConfigAlertMask
-        self._i2c.write_word(self.address, self.kRegConfig, config)
+        self.write16(self.address, self.kRegConfig, config)
 
     def get_alert(self, clear = False):
         """
@@ -580,12 +580,12 @@ class QwiicMAX1704X(object):
         :return: True if the alert interrupt is/was triggered, otherwise False
         """
         
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         alert = (config & self.kConfigAlertMask) == self.kConfigAlertMask
 
         if clear and alert:
             config &= ~self.kConfigAlertMask
-            self._i2c.write_word(self.address, self.kRegConfig, config)
+            self.write16(self.address, self.kRegConfig, config)
         
         return alert
 
@@ -600,12 +600,12 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
         
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         config |= self.kConfigSocAlertMask
-        self._i2c.write_word(self.address, self.kRegConfig, config)
+        self.write16(self.address, self.kRegConfig, config)
 
         # TODO: this check below existed for the arduino lib, but not sure it's needed
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         return (config & self.kConfigSocAlertMask) == self.kConfigSocAlertMask
     
     def disable_soc_alert(self):
@@ -619,12 +619,12 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
         
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         config &= ~self.kConfigSocAlertMask
-        self._i2c.write_word(self.address, self.kRegConfig, config)
+        self.write16(self.address, self.kRegConfig, config)
 
         # TODO: this check below existed for the arduino lib, but not sure it's needed
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         return (config & self.kConfigSocAlertMask) == 0
     
     def enable_alert(self):
@@ -639,10 +639,10 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         status |= self.kStatusEnVrMask
 
-        self._i2c.write_word(self.address, self.kRegStatus, status)
+        self.write16(self.address, self.kRegStatus, status)
     
     def disable_alert(self):
         """
@@ -656,10 +656,10 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
 
-        status = self._i2c.read_word(self.address, self.kRegStatus)
+        status = self.read16(self.address, self.kRegStatus)
         status &= ~self.kStatusEnVrMask
 
-        self._i2c.write_word(self.address, self.kRegStatus, status)
+        self.write16(self.address, self.kRegStatus, status)
     
     def get_threshold(self):
         """
@@ -670,7 +670,7 @@ class QwiicMAX1704X(object):
         :rtype: int
         """
 
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         thresh = (config & self.kConfigThresholdMask) >> self.kConfigThresholdShift
 
         # It has an LSb weight of 1%, and can be programmed from 1% to 32%.
@@ -701,11 +701,11 @@ class QwiicMAX1704X(object):
         percent = max(min(percent, 32.0), 0.0)
         thresh = 32 - percent
 
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         config &= ~self.kConfigThresholdMask
         config |= thresh << self.kConfigThresholdShift
 
-        self._i2c.write_word(self.address, self.kRegConfig, config)
+        self.write16(self.address, self.kRegConfig, config)
     
     def sleep(self):
         """
@@ -723,14 +723,14 @@ class QwiicMAX1704X(object):
         """
 
         if self._device > self.kDeviceTypeMAX17044:
-            self._i2c.write_word(self.address, self.kRegMode, self.kModeEnSleep)
+            self.write16(self.address, self.kRegMode, self.kModeEnSleep)
         
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         if config & self.kConfigSleepMask:
             return False # Already asleep
         
         config |= self.kConfigSleepMask
-        self._i2c.write_word(self.address, self.kRegConfig, config)
+        self.write16(self.address, self.kRegConfig, config)
 
         return True
     
@@ -743,18 +743,18 @@ class QwiicMAX1704X(object):
         """
 
         # Read config reg, so we don't modify any other values:
-        config_reg = self._i2c.read_word(self.address, self.kRegConfig)
+        config_reg = self.read16(self.address, self.kRegConfig)
         if not (config_reg & self.kConfigSleepMask):
             return False  # Already awake, do nothing but return an error
 
         config_reg &= ~self.kConfigSleepMask  # Clear sleep bit
 
-        self._i2c.write_word(self.address, self.kRegConfig, config_reg)
+        self.write16(self.address, self.kRegConfig, config_reg)
 
         if self._device > self.kDeviceTypeMAX17044:
             # On the MAX17048, we should also clear the EnSleep bit in the MODE register
             # Strictly, this will clear the QuickStart bit too.
-            self._i2c.write_word(self.address, self.kRegMode, 0x0000)
+            self.write16(self.address, self.kRegMode, 0x0000)
         
         return True
     
@@ -774,7 +774,7 @@ class QwiicMAX1704X(object):
         # Output: Positive integer on success, 0 on fail.
 
         # TODO: will this upset our driver since we don't get an ack?
-        self._i2c.write_word(self.address, self.kRegCommand, 0x5400)
+        self.write16(self.address, self.kRegCommand, 0x5400)
 
 
     def get_compensation(self):
@@ -785,7 +785,7 @@ class QwiicMAX1704X(object):
         :return: The compensation value
         :rtype: int
         """
-        return ( self._i2c.read_word(self.address, self.kRegConfig) & 0xFF00 ) >> 8
+        return ( self.read16(self.address, self.kRegConfig) & 0xFF00 ) >> 8
     
     def set_compensation(self, newCompensation):
         """  
@@ -813,10 +813,10 @@ class QwiicMAX1704X(object):
         : rtype: bool
         """
 
-        config = self._i2c.read_word(self.address, self.kRegConfig)
+        config = self.read16(self.address, self.kRegConfig)
         config &= ~self.kConfigCompMask
         config |= newCompensation << self.kConfigCompShift
-        self._i2c.write_word(self.address, self.kRegConfig, config)
+        self.write16(self.address, self.kRegConfig, config)
     
     def set_valrt_max(self, threshold = 0xFF):
         """
@@ -838,11 +838,11 @@ class QwiicMAX1704X(object):
             return False
         
 
-        valrt = self._i2c.read_word(self.address, self.kRegCValrt)
+        valrt = self.read16(self.address, self.kRegCValrt)
         valrt &= 0xFF00
 
         valrt |= threshold
-        self._i2c.write_word(self.address, self.kRegCValrt, valrt)
+        self.write16(self.address, self.kRegCValrt, valrt)
     
 
     def set_valrt_max_volts(self, threshold_volts = 5.1):
@@ -872,7 +872,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return 0
         
-        valrt = self._i2c.read_word(self.address, self.kRegCValrt)
+        valrt = self.read16(self.address, self.kRegCValrt)
         return valrt & 0x00FF
 
     def set_valrt_min(self, threshold = 0x00 ):
@@ -894,11 +894,11 @@ class QwiicMAX1704X(object):
         if threshold < 0 or threshold > 0xFFFF:
             return False
         
-        valrt = self._i2c.read_word(self.address, self.kRegCValrt)
+        valrt = self.read16(self.address, self.kRegCValrt)
         valrt &= 0x00FF
 
         valrt |= threshold << 8
-        self._i2c.write_word(self.address, self.kRegCValrt, valrt)
+        self.write16(self.address, self.kRegCValrt, valrt)
     
     def set_valrt_min_volts(self, threshold_volts = 0.0):
         """
@@ -927,7 +927,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return 0
         
-        valrt = self._i2c.read_word(self.address, self.kRegCValrt)
+        valrt = self.read16(self.address, self.kRegCValrt)
         return (valrt & 0xFF00) >> 8
 
     def is_hibernating(self):
@@ -941,7 +941,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
         
-        mode = self._i2c.read_word(self.address, self.kRegMode)
+        mode = self.read16(self.address, self.kRegMode)
         return (mode & self.kModeHibStat) == self.kModeHibStat
     
     def get_hibrt_act_thr(self):
@@ -956,7 +956,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return 0
         
-        hibrt = self._i2c.read_word(self.address, self.kRegHibRt)
+        hibrt = self.read16(self.address, self.kRegHibRt)
         return hibrt & 0xFF
     
     def set_hibrt_act_thr(self, threshold):
@@ -970,11 +970,11 @@ class QwiicMAX1704X(object):
         if threshold < 0 or threshold > 0xFF:
             return False
         
-        hibrt = self._i2c.read_word(self.address, self.kRegHibRt)
+        hibrt = self.read16(self.address, self.kRegHibRt)
         hibrt &= 0xFF00
 
         hibrt |= threshold
-        self._i2c.write_word(self.address, self.kRegHibRt, hibrt)
+        self.write16(self.address, self.kRegHibRt, hibrt)
 
         return True
     
@@ -1005,7 +1005,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return 0
         
-        hibrt = self._i2c.read_word(self.address, self.kRegHibRt)
+        hibrt = self.read16(self.address, self.kRegHibRt)
         return (hibrt & 0xFF00) >> 8
     
     def set_hibrt_hib_thr(self, threshold):
@@ -1019,11 +1019,11 @@ class QwiicMAX1704X(object):
         if threshold < 0 or threshold > 0xFF:
             return False
         
-        hibrt = self._i2c.read_word(self.address, self.kRegHibRt)
+        hibrt = self.read16(self.address, self.kRegHibRt)
         hibrt &= 0x00FF
 
         hibrt |= threshold << 8
-        self._i2c.write_word(self.address, self.kRegHibRt, hibrt)
+        self.write16(self.address, self.kRegHibRt, hibrt)
 
         return True
 
@@ -1054,7 +1054,7 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
         
-        self._i2c.write_word(self.address, self.kRegHibRt, self.kModeEnHib)
+        self.write16(self.address, self.kRegHibRt, self.kModeEnHib)
 
         return True
     
@@ -1069,6 +1069,33 @@ class QwiicMAX1704X(object):
         if self._device <= self.kDeviceTypeMAX17044:
             return False
         
-        self._i2c.write_word(self.address, self.kRegHibRt, self.kModeDisHib)
+        self.write16(self.address, self.kRegHibRt, self.kModeDisHib)
         return True
+    
+    def write16(self, address, register, data):
+        """
+        Write 16-bit data to a register (big-endian)
+
+        :param register: The register to write to
+        :type register: int
+        :param data: The data to write
+        :type data: int
+        """
+
+        bytes_to_write = [(data >> 8) & 0xFF, data & 0xFF]
+        self._i2c.write_block(address, register, bytes_to_write)
+    
+    def read16(self, address, register):
+        """
+        Read 16-bit data from a register (big-endian)
+
+        :param register: The register to read from
+        :type register: int
+
+        :return: The data read
+        :rtype: int
+        """
+
+        bytes_read = self._i2c.read_block(address, register, 2)
+        return (bytes_read[0] << 8) | bytes_read[1]
         
