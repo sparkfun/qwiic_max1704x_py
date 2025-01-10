@@ -399,6 +399,11 @@ class QwiicMAX1704X(object):
             return 0
         
         crate = self.read16(self.address, self.kRegCRate)
+
+        # convert from unsinged to signed 16-bit
+        if crate > 32767:
+            crate -= 65536
+
         return crate * 0.208
     
     # TODO: If these next two fns aren't used, remove them

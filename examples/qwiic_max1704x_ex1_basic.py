@@ -43,7 +43,7 @@ def runExample():
 	print("\nQwiic MAX1704X Example 1 - Simple\n")
 
 	# Create instance of device
-	myLipo = qwiic_max1704x.QwiicMAX1704X() # defaultsd to the MAX17043 device
+	myLipo = qwiic_max1704x.QwiicMAX1704X() # defaults to the MAX17043 device
 
 	# Comment out above line and comment out below line if not using MAX17043. 
 	# You can pass any of the following device types: 

@@ -55,8 +55,8 @@ def runExample():
 	myLipo.begin()
 
 	# Just because we can, let's reset the MAX17048
-	# TODO: The arduino lib doesn't look like it explicitly calls a reset fn here...
 	print("Resetting the MAX17048...")
+	myLipo.reset()
 	time.sleep(1) # Give it time to get its act back together
 
 	# Read and print the reset indicator
@@ -98,7 +98,7 @@ def runExample():
 	print("High voltage threshold is currently: {:.2f}V".format(high_voltage))
 
 	# Set the high voltage threshold
-	myLipo.set_valrt_max(4.1) # Set high voltage threshold (Volts)
+	myLipo.set_valrt_max_volts(4.1) # Set high voltage threshold (Volts)
 
 	# Read and print the high voltage threshold
 	high_voltage = myLipo.get_valrt_max() * 0.02 # 1 LSb is 20mV. Convert to Volts.
@@ -109,7 +109,7 @@ def runExample():
 	print("Low voltage threshold is currently: {:.2f}V".format(low_voltage))
 
 	# Set the low voltage threshold
-	myLipo.set_valrt_min(3.9) # Set low voltage threshold (Volts)
+	myLipo.set_valrt_min_volts(3.9) # Set low voltage threshold (Volts)
 
 	# Read and print the low voltage threshold
 	low_voltage = myLipo.get_valrt_min() * 0.02 # 1 LSb is 20mV. Convert to Volts.
@@ -142,9 +142,9 @@ def runExample():
 
 		print("Alert: {}".format(myLipo.get_alert()))  # Print the generic alert flag
 
-		print("Voltage High Alert: {}".format(myLipo.is_voltage_high()))  # Print the alert flag
+		print("Voltage High Alert: {}".format(myLipo.is_voltage_high(True)))  # Print the alert flag. Passing "True" also clears the flag
 
-		print("Voltage Low Alert: {}".format(myLipo.is_voltage_low()))  # Print the alert flag
+		print("Voltage Low Alert: {}".format(myLipo.is_voltage_low(True)))  # Print the alert flag. Passing "True" also clears the flag
 
 		print("Empty Alert: {}".format(myLipo.is_low()))  # Print the alert flag
 
